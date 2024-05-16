@@ -316,13 +316,16 @@ def meta_data_tags_to_dict(nirs_element: NirsElement):
 
 def stim_to_dataframe(stim):
     dfs = []
-
-    if len(stim) == 0:
+    # FIXME: Quickfix
+    if (len(stim) == 0) or (np.all([True if (len(st.data.shape) != 2) else False for st in stim])):
         columns = ["onset", "duration", "value"]
         return pd.DataFrame(columns=columns)
 
     for st in stim:
         columns = ["onset", "duration", "value"]
+        
+        if len(st.data.shape) != 2:
+            continue
 
         ncols = st.data.shape[1]
 
@@ -537,7 +540,7 @@ def read_nirs_element(nirs_element):
 
 
 def read_snirf(fname):
-    with Snirf(fname, "r") as s:
+    with Snirf(rf"{fname}", "r+") as s:
         return [read_nirs_element(ne) for ne in s.nirs]
 
 
